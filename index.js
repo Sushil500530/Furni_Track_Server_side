@@ -33,6 +33,61 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    const userCollection = client.db('bookreaderDB').collection('users')
+    const managersCollection = client.db('bookreaderDB').collection('managers')
+
+    // authentication token related api 
+    app.post('/jwt', (req, res) => {
+      try {
+        const user = req.body;
+        const token = jwt.sign(user, process.env.ACCESS_SECRET_TOKEN, { expiresIn: '150d' });
+        // console.log('token is ------>', token);
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production' ? true : false,
+          sameSite: process.env.NODE_ENV === 'production' ? "none" : "strict"
+        }).send({ success: true, token })
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
+    // verify token 
+    const verifyToken = async (req, res, next) => {
+      try {
+        const token = req.cookies?.token;
+        // console.log('token is found?-------->', token);
+        if (!token) {
+          return res.status(401).send({ message: 'not authorized access' })
+        }
+        jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (error, decode) => {
+          if (error) {
+            return res.status(401).send({ message: 'unAuthorized access why' })
+          }
+          req.user = decode;
+          next();
+        })
+      }
+      catch (error) {
+        res.status(401).send({ success: false, message: error.message })
+      }
+    }
+
+    // post method start 
+    app.post('/logout', async (req, res) => {
+      try {
+        const user = req.body;
+        // console.log('log out user is in---->', user);
+        res.clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true }).send({ success: true })
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
+
+
+
+
 
 
     // Send a ping to confirm a successful connection
