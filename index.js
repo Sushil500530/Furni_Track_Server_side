@@ -126,6 +126,39 @@ async function run() {
       }
     })
 
+    // manager related api 
+    app.get('/managers', verifyToken, async (req, res) => {
+      try {
+        const result = await managersCollection.find().toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
+    // patch method here 
+    app.patch('/managers', verifyToken, async (req, res) => {
+      try {
+        const manager = req.body;
+        // console.log(manager);
+        const email = req.user?.email;
+        const find = { email: email };
+        const filter = {role: manager?.role}
+        const updateDoc = {
+          $set: {
+            ... filter
+          }
+        }
+        const existedUser = await userCollection.findOne(find);
+        const setUser = await userCollection.updateOne(existedUser,updateDoc);
+        const result = await managersCollection.insertOne(manager);
+        res.send(result);
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
+
 
 
     // Send a ping to confirm a successful connection
