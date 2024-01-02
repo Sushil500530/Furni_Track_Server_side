@@ -35,6 +35,8 @@ async function run() {
   try {
     const userCollection = client.db('bookreaderDB').collection('users')
     const managersCollection = client.db('bookreaderDB').collection('managers')
+    const categoriesCollection = client.db('bookreaderDB').collection('categories')
+    const furnituresCollection = client.db('bookreaderDB').collection('furnitures')
 
     // authentication token related api 
     app.post('/jwt', (req, res) => {
@@ -84,9 +86,6 @@ async function run() {
         console.log(error);
       }
     })
-
-
-
 
     // user related api 
     app.get('/users', async (req, res) => {
@@ -159,6 +158,36 @@ async function run() {
       }
     })
 
+    app.get('/categories', async (req, res) => {
+      try {
+        const result = await categoriesCollection.find().toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
+    // get furniture data 
+    app.get('/furnitures', async (req, res) => {
+      try {
+        const result = await furnituresCollection.find().toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
+    app.get('/furniture/:category', async (req, res) => {
+      try {
+        const category = req.params.category;
+        const query = {category :category}
+        const result = await furnituresCollection.find(query).toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
 
 
     // Send a ping to confirm a successful connection
