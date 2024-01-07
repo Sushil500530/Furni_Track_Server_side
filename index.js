@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const cookieParser = require('cookie-parser')
 var jwt = require('jsonwebtoken');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -37,6 +37,8 @@ async function run() {
     const managersCollection = client.db('bookreaderDB').collection('managers')
     const categoriesCollection = client.db('bookreaderDB').collection('categories')
     const furnituresCollection = client.db('bookreaderDB').collection('furnitures')
+    const salesCollection = client.db('bookreaderDB').collection('sales')
+    const favoritesCollection = client.db('bookreaderDB').collection('favorites')
 
     // authentication token related api 
     app.post('/jwt', (req, res) => {
@@ -188,8 +190,86 @@ async function run() {
         console.log(error);
       }
     })
+    app.get('/furnitures/:id', async (req, res) => {
+      try {
+        const id = req.params?.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await furnituresCollection.findOne(query);
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
+    // favorites data collection is here 
+    // get method is here 
+    app.get('/favorites', async(req,res) => {
+      try{
+        const result = await favoritesCollection.find().toArray();
+        res.send(result);
+      }
+      catch(error) {
+        console.log(error);
+      }
 
+    })
+    app.get('/favorite', async(req,res) => {
+      try{
+        const email = req.query.email;
+        const query = {email: email}
+        // console.log('query email is here ====>',query);
+        const result = await favoritesCollection.find(query).toArray();
+        res.send(result);
+      }
+      catch(error) {
+        console.log(error);
+      }
+    });
+    app.post('/favorites', async(req,res) => {
+      try{
+        const favoriteData = req.body;
+        const result = await favoritesCollection.insertOne(favoriteData);
+        res.send(result)
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
+    // sales collection data is here 
+    // get data 
+    app.get('/sales', async(req,res) => {
+      try{
+        const result = await salesCollection.find().toArray();
+        res.send(result);
+      }
+      catch(error) {
+        console.log(error);
+      }
 
+    })
+    app.get('/sale', async(req,res) => {
+      try{
+        const email = req.query.email;
+        const query = {email: email}
+        // console.log('query email is here ====>',query);
+        const result = await salesCollection.find(query).toArray();
+        res.send(result);
+      }
+      catch(error) {
+        console.log(error);
+      }
+
+    })
+    app.post('/sales', async(req,res) => {
+      try{
+        const saleData = req.body;
+        const result = await salesCollection.insertOne(saleData);
+        res.send(result)
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
