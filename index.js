@@ -4,12 +4,15 @@ require('dotenv').config();
 const cookieParser = require('cookie-parser')
 var jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware 
 app.use(cors({
   origin: [
+    "https://obedient-ghost.surge.sh",
+    "obedient-ghost.surge.sh",
     "http://localhost:5173",
     "http://localhost:5174",
   ],
@@ -19,7 +22,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-
+ 
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@cluster0.ruakr2a.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -48,8 +51,8 @@ async function run() {
         // console.log('token is ------>', token);
         res.cookie('token', token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production' ? true : false,
-          sameSite: process.env.NODE_ENV === 'production' ? "none" : "strict"
+          secure: true,
+        sameSite:'none'
         }).send({ success: true, token })
       }
       catch (error) {
@@ -265,6 +268,36 @@ async function run() {
         const saleData = req.body;
         const result = await salesCollection.insertOne(saleData);
         res.send(result)
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
+    app.delete('/sale/:id', async(req,res) => {
+      try{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)};
+        const result = await salesCollection.deleteOne(query);
+        res.send(result)
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
+
+    // payment related api here
+
+    app.post('/create-payment', async(req, res) => {
+      try{
+        const {price} = req.body;
+        const convertedPrice = parseInt(price * 100);
+        console.log('your price is=======>',convertedPrice);
+        const paymentNow = await stripe?.paymentIntents?.create({
+          amount:convertedPrice,
+          currency:'usd',
+          payment_method_types:['card']
+        });
+        res.send({clientSecret:paymentNow?.client_secret})
       }
       catch(error){
         console.log(error);
