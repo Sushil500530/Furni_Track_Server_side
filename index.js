@@ -42,6 +42,7 @@ async function run() {
     const furnituresCollection = client.db('bookreaderDB').collection('furnitures')
     const salesCollection = client.db('bookreaderDB').collection('sales')
     const favoritesCollection = client.db('bookreaderDB').collection('favorites')
+    const paymentsCollection = client.db('bookreaderDB').collection('favorites')
 
     // authentication token related api 
     app.post('/jwt', (req, res) => {
@@ -291,13 +292,53 @@ async function run() {
       try{
         const {price} = req.body;
         const convertedPrice = parseInt(price * 100);
-        console.log('your price is=======>',convertedPrice);
+        // console.log('your price is=======>',convertedPrice);
         const paymentNow = await stripe?.paymentIntents?.create({
           amount:convertedPrice,
           currency:'usd',
           payment_method_types:['card']
         });
         res.send({clientSecret:paymentNow?.client_secret})
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
+    // get method for payments 
+
+    app.get('/payments', async(req, res) => {
+      try{
+        const result = await paymentsCollection.find().toArray();
+        res.send(result)
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
+    // query from email 
+    app.get('/payment', async(req, res) => {
+      try{
+        const email = req.query.email;
+        const query = {email: email}
+        console.log('my payment email  is =====>', query);
+        const result = await paymentsCollection.find(query).toArray();
+        res.send(result)
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
+    app.post('/payments', async(req, res) => {
+      try{
+        const paymentInfo = req.body;
+        const paymentResult = await paymentsCollection.insertOne(paymentInfo);
+        const query = {
+          _id: {
+            $in:paymentInfo?.saleIds?.map(id => new ObjectId(id))
+          }
+        }
+        const deleteResult = await salesCollection.deleteMany(query);
+        res.send({paymentResult,deleteResult})
       }
       catch(error){
         console.log(error);
