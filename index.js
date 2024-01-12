@@ -114,6 +114,25 @@ async function run() {
         console.log(error);
       }
     })
+    app.put('/user/:id', async (req, res) => {
+      try {
+        const changes =req.body;
+        const id =req.params.id;
+        const filter = {_id: new ObjectId(id)}
+        const options = { upsert: true };
+        const updateDoc = {
+          $set: {
+           ...changes
+          },
+        };
+        // console.log('what element is the changes ====>', updateDoc);
+        const result = await userCollection.updateOne(filter,updateDoc,options);
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
     // post method 
     app.post('/users', async (req, res) => {
       try {
@@ -322,6 +341,17 @@ async function run() {
         const query = {email: email}
         console.log('my payment email  is =====>', query);
         const result = await paymentsCollection.find(query).toArray();
+        res.send(result)
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
+    app.delete('/payment/:id', async(req, res) => {
+      try{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await paymentsCollection.deleteOne(query);
         res.send(result)
       }
       catch(error){
