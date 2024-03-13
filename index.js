@@ -11,8 +11,8 @@ const port = process.env.PORT || 5000;
 // middleware 
 app.use(cors({
   origin: [
-    "https://obedient-ghost.surge.sh",
-    "obedient-ghost.surge.sh",
+    "https://furniture-shop.surge.sh",
+    "furniture-shop.surge.sh",
     "http://localhost:5173",
     "http://localhost:5174",
   ],
@@ -153,7 +153,9 @@ async function run() {
     // manager related api 
     app.get('/managers', verifyToken, async (req, res) => {
       try {
-        const result = await managersCollection.find().toArray();
+        const email = req.query.email;
+        const filter = {email:email};
+        const result = await managersCollection.find(filter).toArray();
         res.send(result)
       }
       catch (error) {
@@ -236,7 +238,7 @@ async function run() {
       }
 
     })
-    app.get('/favorite', async(req,res) => {
+    app.get('/favorites', async(req,res) => {
       try{
         const email = req.query.email;
         const query = {email: email}
@@ -258,6 +260,18 @@ async function run() {
         console.log(error);
       }
     })
+    app.delete('/favorite/:id', async(req,res) => {
+      try{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)}
+        // console.log('query email is here ====>',query);
+        const result = await favoritesCollection.deleteOne(query);
+        res.send(result);
+      }
+      catch(error) {
+        console.log(error);
+      }
+    });
     // sales collection data is here 
     // get data 
     app.get('/sales', async(req,res) => {
@@ -281,8 +295,8 @@ async function run() {
       catch(error) {
         console.log(error);
       }
-
     })
+    
     app.post('/sales', async(req,res) => {
       try{
         const saleData = req.body;
@@ -339,7 +353,7 @@ async function run() {
       try{
         const email = req.query.email;
         const query = {email: email}
-        console.log('my payment email  is =====>', query);
+        // console.log('my payment email  is =====>', query);
         const result = await paymentsCollection.find(query).toArray();
         res.send(result)
       }
