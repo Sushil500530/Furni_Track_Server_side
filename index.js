@@ -184,6 +184,18 @@ async function run() {
         console.log(error);
       }
     })
+    // managers post data from ui layout
+    app.post('/furniture', async(req,res)=>{
+      try{
+        const product = req.body;
+        const result = await furnituresCollection.insertOne(product);
+        res.send(result)
+
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
 
     app.get('/categories', async (req, res) => {
       try {
@@ -337,6 +349,8 @@ async function run() {
         console.log(error);
       }
     })
+
+
     // get method for payments 
 
     app.get('/payments', async(req, res) => {
