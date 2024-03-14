@@ -22,7 +22,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
- 
+
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@cluster0.ruakr2a.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -53,7 +53,7 @@ async function run() {
         res.cookie('token', token, {
           httpOnly: true,
           secure: true,
-        sameSite:'none'
+          sameSite: 'none'
         }).send({ success: true, token })
       }
       catch (error) {
@@ -103,10 +103,10 @@ async function run() {
         console.log(error);
       }
     })
-    app.get('/users/:email',verifyToken, async (req, res) => {
+    app.get('/users/:email', verifyToken, async (req, res) => {
       try {
         const email = req.params.email;
-        const query = {email: email}
+        const query = { email: email }
         const result = await userCollection.findOne(query);
         res.send(result)
       }
@@ -116,17 +116,17 @@ async function run() {
     })
     app.put('/user/:id', async (req, res) => {
       try {
-        const changes =req.body;
-        const id =req.params.id;
-        const filter = {_id: new ObjectId(id)}
+        const changes = req.body;
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) }
         const options = { upsert: true };
         const updateDoc = {
           $set: {
-           ...changes
+            ...changes
           },
         };
         // console.log('what element is the changes ====>', updateDoc);
-        const result = await userCollection.updateOne(filter,updateDoc,options);
+        const result = await userCollection.updateOne(filter, updateDoc, options);
         res.send(result)
       }
       catch (error) {
@@ -154,7 +154,7 @@ async function run() {
     app.get('/managers', verifyToken, async (req, res) => {
       try {
         const email = req.query.email;
-        const filter = {email:email};
+        const filter = { email: email };
         const result = await managersCollection.find(filter).toArray();
         res.send(result)
       }
@@ -169,14 +169,14 @@ async function run() {
         // console.log(manager);
         const email = req.user?.email;
         const find = { email: email };
-        const filter = {role: manager?.role}
+        const filter = { role: manager?.role }
         const updateDoc = {
           $set: {
-            ... filter
+            ...filter
           }
         }
         const existedUser = await userCollection.findOne(find);
-        const setUser = await userCollection.updateOne(existedUser,updateDoc);
+        const setUser = await userCollection.updateOne(existedUser, updateDoc);
         const result = await managersCollection.insertOne(manager);
         res.send(result);
       }
@@ -185,18 +185,29 @@ async function run() {
       }
     })
     // managers post data from ui layout
-    app.post('/furniture', async(req,res)=>{
-      try{
+    app.post('/furniture', async (req, res) => {
+      try {
         const product = req.body;
         const result = await furnituresCollection.insertOne(product);
         res.send(result)
 
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
-
+    //  furniture delete 
+    app.delete('/furniture-delete/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await furnituresCollection.deleteOne(query);
+        res.send(result);
+      }
+      catch (error) {
+        console.log(error);
+      }
+    });
     app.get('/categories', async (req, res) => {
       try {
         const result = await categoriesCollection.find().toArray();
@@ -219,7 +230,7 @@ async function run() {
     app.get('/furniture/:category', async (req, res) => {
       try {
         const category = req.params.category;
-        const query = {category :category}
+        const query = { category: category }
         const result = await furnituresCollection.find(query).toArray();
         res.send(result)
       }
@@ -230,7 +241,7 @@ async function run() {
     app.get('/furnitures/:id', async (req, res) => {
       try {
         const id = req.params?.id;
-        const query = {_id: new ObjectId(id)}
+        const query = { _id: new ObjectId(id) }
         const result = await furnituresCollection.findOne(query);
         res.send(result)
       }
@@ -240,112 +251,112 @@ async function run() {
     })
     // favorites data collection is here 
     // get method is here 
-    app.get('/favorites', async(req,res) => {
-      try{
+    app.get('/favorites', async (req, res) => {
+      try {
         const result = await favoritesCollection.find().toArray();
         res.send(result);
       }
-      catch(error) {
+      catch (error) {
         console.log(error);
       }
 
     })
-    app.get('/favorites', async(req,res) => {
-      try{
+    app.get('/favorites', async (req, res) => {
+      try {
         const email = req.query.email;
-        const query = {email: email}
+        const query = { email: email }
         // console.log('query email is here ====>',query);
         const result = await favoritesCollection.find(query).toArray();
         res.send(result);
       }
-      catch(error) {
+      catch (error) {
         console.log(error);
       }
     });
-    app.post('/favorites', async(req,res) => {
-      try{
+    app.post('/favorites', async (req, res) => {
+      try {
         const favoriteData = req.body;
         const result = await favoritesCollection.insertOne(favoriteData);
         res.send(result)
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
-    app.delete('/favorite/:id', async(req,res) => {
-      try{
+    app.delete('/favorite/:id', async (req, res) => {
+      try {
         const id = req.params.id;
-        const query = {_id: new ObjectId(id)}
+        const query = { _id: new ObjectId(id) }
         // console.log('query email is here ====>',query);
         const result = await favoritesCollection.deleteOne(query);
         res.send(result);
       }
-      catch(error) {
+      catch (error) {
         console.log(error);
       }
     });
     // sales collection data is here 
     // get data 
-    app.get('/sales', async(req,res) => {
-      try{
+    app.get('/sales', async (req, res) => {
+      try {
         const result = await salesCollection.find().toArray();
         res.send(result);
       }
-      catch(error) {
+      catch (error) {
         console.log(error);
       }
 
     })
-    app.get('/sale', async(req,res) => {
-      try{
+    app.get('/sale', async (req, res) => {
+      try {
         const email = req.query.email;
-        const query = {email: email}
+        const query = { email: email }
         // console.log('query email is here ====>',query);
         const result = await salesCollection.find(query).toArray();
         res.send(result);
       }
-      catch(error) {
+      catch (error) {
         console.log(error);
       }
     })
-    
-    app.post('/sales', async(req,res) => {
-      try{
+
+    app.post('/sales', async (req, res) => {
+      try {
         const saleData = req.body;
         const result = await salesCollection.insertOne(saleData);
         res.send(result)
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
-    app.delete('/sale/:id', async(req,res) => {
-      try{
+    app.delete('/sale/:id', async (req, res) => {
+      try {
         const id = req.params.id;
-        const query = {_id: new ObjectId(id)};
+        const query = { _id: new ObjectId(id) };
         const result = await salesCollection.deleteOne(query);
         res.send(result)
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
 
     // payment related api here
 
-    app.post('/create-payment', async(req, res) => {
-      try{
-        const {price} = req.body;
+    app.post('/create-payment', async (req, res) => {
+      try {
+        const { price } = req.body;
         const convertedPrice = parseInt(price * 100);
         // console.log('your price is=======>',convertedPrice);
         const paymentNow = await stripe?.paymentIntents?.create({
-          amount:convertedPrice,
-          currency:'usd',
-          payment_method_types:['card']
+          amount: convertedPrice,
+          currency: 'usd',
+          payment_method_types: ['card']
         });
-        res.send({clientSecret:paymentNow?.client_secret})
+        res.send({ clientSecret: paymentNow?.client_secret })
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
@@ -353,52 +364,52 @@ async function run() {
 
     // get method for payments 
 
-    app.get('/payments', async(req, res) => {
-      try{
+    app.get('/payments', async (req, res) => {
+      try {
         const result = await paymentsCollection.find().toArray();
         res.send(result)
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
     // query from email 
-    app.get('/payment', async(req, res) => {
-      try{
+    app.get('/payment', async (req, res) => {
+      try {
         const email = req.query.email;
-        const query = {email: email}
+        const query = { email: email }
         // console.log('my payment email  is =====>', query);
         const result = await paymentsCollection.find(query).toArray();
         res.send(result)
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
-    app.delete('/payment/:id', async(req, res) => {
-      try{
+    app.delete('/payment/:id', async (req, res) => {
+      try {
         const id = req.params.id;
-        const query = {_id: new ObjectId(id)}
+        const query = { _id: new ObjectId(id) }
         const result = await paymentsCollection.deleteOne(query);
         res.send(result)
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
-    app.post('/payments', async(req, res) => {
-      try{
+    app.post('/payments', async (req, res) => {
+      try {
         const paymentInfo = req.body;
         const paymentResult = await paymentsCollection.insertOne(paymentInfo);
         const query = {
           _id: {
-            $in:paymentInfo?.saleIds?.map(id => new ObjectId(id))
+            $in: paymentInfo?.saleIds?.map(id => new ObjectId(id))
           }
         }
         const deleteResult = await salesCollection.deleteMany(query);
-        res.send({paymentResult,deleteResult})
+        res.send({ paymentResult, deleteResult })
       }
-      catch(error){
+      catch (error) {
         console.log(error);
       }
     })
