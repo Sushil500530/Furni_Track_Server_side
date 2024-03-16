@@ -196,6 +196,26 @@ async function run() {
         console.log(error);
       }
     })
+    // update furniture product 
+    app.patch('/updated/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updateData = req.body;
+        const  query = {_id: new ObjectId(id)}
+        const options = { $upsert:true};
+        const updataDoc = {
+          $set:{
+            ...updateData
+          }
+        }
+        const result = await furnituresCollection.updateOne(query, updataDoc, options);
+        res.send(result);
+      }
+      catch (error) {
+        console.log(error);
+      }
+    });
+
     //  furniture delete 
     app.delete('/furniture-delete/:id', async (req, res) => {
       try {
