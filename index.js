@@ -168,6 +168,18 @@ async function run() {
         console.log(error);
       }
     });
+    //  manager delete 
+    app.delete('/user-delete/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) }
+        const result = await userCollection.deleteOne(filter);
+        res.send(result);
+      }
+      catch (error) {
+        console.log(error);
+      }
+    });
 
     // manager related api 
     app.get('/managers', verifyToken, async (req, res) => {
