@@ -153,6 +153,16 @@ async function run() {
     // manager related api 
     app.get('/managers', verifyToken, async (req, res) => {
       try {
+        const result = await managersCollection.find().toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
+    // manager related api 
+    app.get('/manager', verifyToken, async (req, res) => {
+      try {
         const email = req.query.email;
         const filter = { email: email };
         const result = await managersCollection.find(filter).toArray();
