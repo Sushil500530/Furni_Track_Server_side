@@ -172,6 +172,18 @@ async function run() {
         console.log(error);
       }
     })
+    //  manager delete 
+    app.delete('/manager-delete/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await managersCollection.deleteOne(query);
+        res.send(result);
+      }
+      catch (error) {
+        console.log(error);
+      }
+    });
     // patch method here 
     app.patch('/managers', verifyToken, async (req, res) => {
       try {
@@ -211,10 +223,10 @@ async function run() {
       try {
         const id = req.params.id;
         const updateData = req.body;
-        const  query = {_id: new ObjectId(id)}
-        const options = { $upsert:true};
+        const query = { _id: new ObjectId(id) }
+        const options = { $upsert: true };
         const updataDoc = {
-          $set:{
+          $set: {
             ...updateData
           }
         }
