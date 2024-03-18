@@ -149,6 +149,25 @@ async function run() {
         console.log(error);
       }
     })
+    // user role change 
+    app.patch('/change-role/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const rolechangeData = req.body;
+        const query = { _id: new ObjectId(id) }
+        const options = { $upsert: true };
+        const updataDoc = {
+          $set: {
+            ...rolechangeData
+          }
+        }
+        const result = await userCollection.updateOne(query, updataDoc, options);
+        res.send(result);
+      }
+      catch (error) {
+        console.log(error);
+      }
+    });
 
     // manager related api 
     app.get('/managers', verifyToken, async (req, res) => {
