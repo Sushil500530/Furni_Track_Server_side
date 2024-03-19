@@ -414,6 +414,17 @@ async function run() {
         console.log(error);
       }
     })
+    app.delete('/all-sale/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await salesCollection.deleteOne(query);
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error);
+      }
+    })
 
     // payment related api here
 
