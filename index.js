@@ -322,6 +322,19 @@ async function run() {
         console.log(error);
       }
     })
+
+    // furniture delete method 
+    app.delete("furniture/:id", async(req,res)=>{
+      try{
+        const id = req.params.id;
+        const filter = {_id: new ObjectId(id)};
+        const result = await furnituresCollection.deleteOne(filter);
+        res.send(result);
+      }
+      catch(error){
+        console.log(error);
+      }
+    })
     // favorites data collection is here 
     // get method is here 
     app.get('/favorites', async (req, res) => {
